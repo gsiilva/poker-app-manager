@@ -1,0 +1,173 @@
+/* ==========================================================================
+   RESET & CONFIGURAÇÕES GERAIS
+   ========================================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app-container {
+  color: #ffffff;
+  background-color: #1a1a1a;
+  min-height: 100vh;
+  font-family: sans-serif;
+}
+
+/* ==========================================================================
+   HEADER FIXO NO TOPO
+   ========================================================================== */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #111111;
+  display: flex;
+  justify-content: space-between; /* Título na esquerda, botão na direita */
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid #222;
+  z-index: 1000;
+}
+
+.app-header h2 {
+  font-size: 20px;
+  color: #ff9800; /* Destaque laranja */
+  font-weight: bold;
+}
+
+/* Botão de alternar telas (Header) */
+.btn.switch-screen {
+  background-color: #00b8e6;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espaço entre o ícone e o texto */
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btn.switch-screen:hover {
+  background-color: #017d9c;
+}
+
+/* ==========================================================================
+   CONTEÚDO PRINCIPAL (MAIN) & GRID
+   ========================================================================== */
+.main-content {
+  margin-top: 60px; /* Empurra o conteúdo para baixo da altura do Header */
+  padding: 20px;
+}
+
+.dashboard-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   ESTILO DOS CARDS
+   ========================================================================== */
+.card {
+  background-color: #2a2a2a;
+  padding: 20px;
+  border-radius: 8px;
+  width: 250px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  margin: 0;
+  color: #aaaaaa;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Valores internos dos Cards */
+.card-valueMoney, .card-valueChips, .card-valuePlayers {
+  font-size: 26px;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Botões dentro dos Cards */
+.card-btns {
+  display: flex;
+  gap: 8px;       /* Espaço entre um botão e outro */
+  margin-top: 15px;
+  width: 100%;
+}
+
+.player-form{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* ESTILO BASE PARA TODOS OS BOTÕES */
+.btn {
+  flex: 1;         /* Faz os dois botões dividirem o espaço igualmente */
+  border: none;
+  padding: 8px 4px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.95); /* Efeito de clique */
+}
+
+.btn:hover {
+  opacity: 0.9; /* Efeito de passar o mouse */
+}
+
+/* CORES DOS BOTÕES ESPECÍFICOS (Sem espaços nos seletores) */
+.btn.addBalance {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn.removeBalance {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn.addChips {
+  background-color: #2196f3;
+  color: white;
+}
+
+.btn.removeChips {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Estilo geral dos ícones (tamanho) e cores personalizadas */
+.icon-chips { font-size: 26px; color: #2196f3; }
+.icon-players { font-size: 24px; color: #ff9800; }
+
+/* Valor em destaque dentro do Card */
+.card-valueMoney, .card-valueChips, .card-valuePlayers {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+.card-valueMoney { color: #4caf50; }
+.card-valueChips { color: #2196f3; }
+.card-valuePlayers { color: #ff9800; }
