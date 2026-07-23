@@ -7,22 +7,25 @@ import { FiUsers, FiArrowLeft, FiUserPlus } from "react-icons/fi";
 interface Player {
   id: number;
   name: string;
+  cpf?: string;
+  phone?: string;
+  email?: string;
   balance: number;
-  isActive: boolean;
+  isActive: boolean;  
 }
 
 function App() {
   const [houseBalance, setHouseBalance] = useState<number>(0);
   const [houseChips, setHouseChips] = useState<number>(0);
   const [players, setPlayers] = useState<Player[]>([
-    { id: 1, name: "Player 1", balance: 1000, isActive: true },
-    { id: 2, name: "Player 2", balance: 1500, isActive: true },
-    { id: 3, name: "Player 3", balance: 2000, isActive: false },
   ]);
+
+  const [cpfInput, setCpfInput] = useState<string>("");
+  const [phoneInput, setPhoneInput] = useState<string>("");
 
   const activePlayersCount = players.filter(player => player.isActive).length;
 
-  const [currentScreen, setCurrentScreen] = useState<"dashboard" | "register">("dashboard");
+  const [currentScreen, setCurrentScreen] = useState<"dashboard" | "register" | "cashier">("dashboard");
 
   const addHouseBalance = (amount: number) => {
     setHouseBalance(prevBalance => prevBalance + amount);
@@ -31,28 +34,80 @@ function App() {
   const addHouseChips = (amount: number) => {
     setHouseChips(prevChips => prevChips + amount);
   };
+  
+  // Função para lidar com a mudança no campo de CPF
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não é número
+    if (value.length > 11) value = value.slice(0, 11); // Limita a 11 dígitos
+
+    // Aplica a formatação 999.999.999-99
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    
+    setCpfInput(value);
+  };
+
+  // Função para lidar com a mudança no campo de telefone
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não é número
+    if (value.length > 11) value = value.slice(0, 11); // Limita a 11 dígitos
+
+    // Aplica a formatação (99) 99999-9999
+    value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+    value = value.replace(/(\d{5})(\d)/, "$1-$2");
+    
+    setPhoneInput(value);
+  };
 
   const handleCreatePlayer = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const name = formData.get("playerName") as string; // Nome alterado para bater com o input
-    const balance = parseInt(formData.get("playerBalance") as string) || 0; // Se não digitar nada, vira 0
+    const name = formData.get("playerName") as string
+    const cpf = formData.get("playerCpf") as string;
+    const phone = formData.get("playerNumber") as string;
+    const email = formData.get("playerEmail") as string;
 
     if (!name.trim()) return; // Validação simples para não salvar nome vazio
 
-    addPlayer(name, balance);
+    addPlayer(name, cpf, phone, email);
 
     e.currentTarget.reset(); // Limpa os campos do formulário automaticamente
+
+    setCpfInput(""); // Limpa o estado do CPF
+    setPhoneInput(""); // Limpa o estado do telefone
+
     setCurrentScreen("dashboard"); // Redireciona o usuário de volta ao Dashboard
   };
 
-  const addPlayer = (name: string, balance: number) => {
+  const handleCashierAction = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    const depositAmount = parseFloat(formData.get("depositAmount") as string);
+    const withdrawAmount = parseFloat(formData.get("withdrawAmount") as string);
+
+    if(!isNaN(depositAmount) && depositAmount > 0) {
+      addHouseBalance(depositAmount);
+    }
+    if(!isNaN(withdrawAmount) && withdrawAmount > 0) {
+      addHouseBalance(-withdrawAmount);
+    }
+
+    e.currentTarget.reset(); // Limpa os campos do formulário automaticamente
+  }
+
+
+const addPlayer = (name: string, cpf: string, phone: string, email: string) => {
     const newPlayer: Player = {
       id: players.length + 1,
       name,
-      balance,
-      isActive: true
+      cpf,
+      phone,
+      email,
+      balance: 0,
+      isActive: true,
     };
     setPlayers([...players, newPlayer]);
   };
@@ -64,20 +119,22 @@ function App() {
           <h2>Poker Dash</h2>
         </div>
         <div className="header-right">
-          {currentScreen === "dashboard" ? (
-            <button className="btn switch-screen" onClick={() => setCurrentScreen("register")}>
-              <FiUserPlus /> New Player
+            <button className={`btn switch-screen ${currentScreen === "dashboard" ? "active" : ""}` } onClick={() => setCurrentScreen("dashboard")}>
+              <FiArrowLeft /> Dashboard
             </button>
-          ) : (
-            <button className="btn switch-screen" onClick={() => setCurrentScreen("dashboard")}>
-              <FiArrowLeft /> Back to Dashboard
+
+            <button className={`btn switch-screen ${currentScreen === "register" ? "active" : ""}`} onClick={() => setCurrentScreen("register")}>
+              <FiArrowLeft /> Register New Player
             </button>
-          )}
+
+            <button className={`btn switch-screen ${currentScreen === "cashier" ? "active" : ""}`} onClick={() => setCurrentScreen("cashier")}>
+              <FiArrowLeft /> Cashier
+            </button>
         </div>
       </header>
 
       <main className="main-content">
-        {currentScreen === "dashboard" ? (
+        {currentScreen === "dashboard" && (
           /* ABA DO DASHBOARD */
           <div className="dashboard-grid">
             {/* Card 1: Balance */}
@@ -114,31 +171,73 @@ function App() {
               </div>
             </div>
           </div>
-        ) : (
-          /* ABA DE CADASTRO */
+        )}
+          {/* ABA DE CADASTRO */}
+          {currentScreen === "register" && (
           <div className="management-section">
             <h2>Register New Player</h2>
             <form onSubmit={handleCreatePlayer} className="player-form">
-              {/* Adicionado a propriedade 'name' que o FormData precisa */}
               <input
                 type="text"
                 name="playerName"
-                placeholder="Player Name..."
+                placeholder="Name"
                 className="player-input"
+                required
               />
-              {/* Adicionado o input para coletar o saldo inicial (balance) */}
               <input
-                type="number"
-                name="playerBalance"
-                placeholder="Initial Buy-in (R$)..."
+                type="text"
+                name="playerCpf"
+                value={cpfInput}
+                onChange={handleCpfChange}
+                placeholder="CPF"
                 className="player-input"
+                required
+              />
+              <input
+                type="text"
+                name="playerNumber"
+                value={phoneInput}
+                onChange={handlePhoneChange}
+                placeholder="Phone"
+                className="player-input"
+                required
+              />
+              <input
+                type="email"
+                name="playerEmail"
+                placeholder="Email"
+                className="player-input"
+                required
               />
               <button type="submit" className="btn-submit">
                 Save Registration
               </button>
             </form>
           </div>
-        )}
+          )}
+          {/* ABA DO CAIXA */}
+          {currentScreen === "cashier" && (
+            <div className="cashier-section">
+              <h2>Cashier</h2>
+              <form onSubmit={handleCashierAction} className="cashier-form">
+                <input
+                  type="number"
+                  name="depositAmount"  
+                  placeholder="Deposit Amount"
+                  className="cashier-input"
+                />
+                <input
+                  type="number"
+                  name="withdrawAmount"
+                  placeholder="Withdraw Amount"
+                  className="cashier-input"
+                />
+                <button type="submit" className="btn-submit">
+                  Perform Transaction
+                </button>
+              </form>
+            </div>
+          )}
       </main>
     </div>
   );
