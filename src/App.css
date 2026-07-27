@@ -34,14 +34,21 @@
 
 .app-header h2 {
   font-size: 20px;
-  color: #ff9800; /* Destaque laranja */
+  color: #FFFFFF; /* Destaque laranja */
   font-weight: bold;
+}
+
+/* Espaço entre o título e os botões do Header */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espaço entre o botão e o título */
 }
 
 /* Botão de alternar telas (Header) */
 .btn.switch-screen {
-  background-color: #00b8e6;
-  color: white;
+  background-color: #FFFFFF;
+  color: black;
   display: flex;
   align-items: center;
   gap: 8px; /* Espaço entre o ícone e o texto */
@@ -49,10 +56,12 @@
   font-size: 14px;
   border-radius: 10px;
   cursor: pointer;
+  width: 150px; /* Largura fixa para consistência */
+  height: auto
 }
 
 .btn.switch-screen:hover {
-  background-color: #017d9c;
+  background-color: #d1cece;
 }
 
 /* ==========================================================================
