@@ -1,10 +1,25 @@
 import { useState } from "react";
 import "./App.css";
 
-import { Header } from "./components/header";
+import { Header } from "./components/Header";
 import { Dashboard } from "./pages/Dashboard";
 import { Register } from "./pages/Register";
 import { Cashier } from "./pages/Cashier";
+
+import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#2e7d32', // Verde do Poker
+    },
+    background: {
+      default: '#121212',
+      paper: '#1e1e1e',
+    },
+  },
+});
 
 export interface Player {
   id: number;
@@ -44,29 +59,32 @@ function App() {
       isActive: true,
     };
     setPlayers([...players, newPlayer]);
-    setCurrentScreen("dashboard"); // Redireciona de volta após criar
+    setCurrentScreen("dashboard");
   };
 
   return (
-    <div className="app-container">
-      <Header currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} />
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <div className="app-container">
+        <Header currentScreen={currentScreen} setCurrentScreen={setCurrentScreen} />
 
-      <main className="main-content">
-        {currentScreen === "dashboard" && (
-          <Dashboard
-            houseBalance={houseBalance}
-            houseChips={houseChips}
-            activePlayersCount={activePlayersCount}
-            addHouseBalance={addHouseBalance}
-            addHouseChips={addHouseChips}
-          />
-        )}
+        <main className="main-content">
+          {currentScreen === "dashboard" && (
+            <Dashboard
+              houseBalance={houseBalance}
+              houseChips={houseChips}
+              activePlayersCount={activePlayersCount}
+              addHouseBalance={addHouseBalance}
+              addHouseChips={addHouseChips}
+            />
+          )}
 
-        {currentScreen === "register" && <Register onAddPlayer={addPlayer} />}
+          {currentScreen === "register" && <Register onAddPlayer={addPlayer} />}
 
-        {currentScreen === "cashier" && <Cashier addHouseBalance={addHouseBalance} />}
-      </main>
-    </div>
+          {currentScreen === "cashier" && <Cashier onAddCash={addHouseBalance} />}
+        </main>
+      </div>
+    </ThemeProvider>
   );
 }
 
