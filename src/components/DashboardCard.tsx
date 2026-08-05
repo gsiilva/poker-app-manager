@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { Card, CardContent, Typography, Box, Stack } from "@mui/material";
 
 interface DashboardCardProps {
   title: string;
@@ -8,10 +9,33 @@ interface DashboardCardProps {
 
 export function DashboardCard({ title, children, actions }: DashboardCardProps) {
   return (
-    <div className="card">
-      <h3 className="card-title">{title}</h3>
-      <div className="card-body">{children}</div>
-      {actions && <div className="card-btns">{actions}</div>}
-    </div>
+    <Card
+      sx={{
+        width: 250,
+        bgcolor: "#2a2a2a",
+        borderRadius: 2,
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <CardContent>
+        <Typography
+          variant="caption"
+          component="h3"
+          sx={{ color: "#aaaaaa", textTransform: "uppercase", letterSpacing: "0.5px" }}
+        >
+          {title}
+        </Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1.25 }}>
+          {children}
+        </Box>
+
+        {actions && (
+          <Stack direction="row" spacing={1} sx={{ mt: 1.875, width: "100%" }}>
+            {actions}
+          </Stack>
+        )}
+      </CardContent>
+    </Card>
   );
 }

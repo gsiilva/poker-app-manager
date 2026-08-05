@@ -8,64 +8,46 @@ import {
   Stack,
   List,
   ListItem,
-  ListItemText
+  ListItemButton,
+  ListItemText,
+  Chip,
 } from "@mui/material";
 
-import PaymentsIcon from '@mui/icons-material/Payments';
+import PaymentsIcon from "@mui/icons-material/Payments";
+import PersonIcon from "@mui/icons-material/Person";
+import CloseIcon from "@mui/icons-material/Close";
 import { Player } from "../App";
 
 interface CashierFormProps {
-  onSubmitCash: (amount: number) => void;
-}
-
-interface PlayerListProps {
   players: Player[];
+  onSubmitCash: (playerId: number, amount: number) => void;
 }
 
-export function PlayerSearchList({ players }: PlayerListProps) {
-  const [searchItem, setSearchItem] = useState<string>("");
-
-  const filteredPlayers = players.filter((player) => {
-    const searchClean = searchItem.replace(/\D/g, "");
-    const playerCpfClean = player.cpf ? player.cpf.replace(/\D/g, "") : "";
-
-    const matchesCpf = searchClean ? playerCpfClean.includes(searchClean) : false;
-    const matchesName = player.name.toLowerCase().includes(searchItem.toLowerCase());
-
-    return matchesCpf || matchesName;
-  });
-
-  return (
-    <Box sx={{ mt: 2 }}>
-      <TextField
-        label="Search Player"
-        variant="outlined"
-        fullWidth
-        value={searchItem}
-        onChange={(e) => setSearchItem(e.target.value)}
-      />
-      <List>
-        {filteredPlayers.map((player) => (
-          <ListItem key={player.id}>
-            <ListItemText primary={player.name} secondary={`CPF: ${player.cpf}`} />
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
-} 
-
-export function CashierForm({ onSubmitCash }: CashierFormProps) {
-  const [cpfInput, setCpfInput] = useState<string>("");
+export function CashierForm({ players, onSubmitCash }: CashierFormProps) {
+  const [searchInput, setSearchInput] = useState<string>("");
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [depositInput, setDepositInput] = useState<string>("");
 
-  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "");
-    if (value.length > 11) value = value.slice(0, 11);
-    value = value.replace(/(\d{3})(\d)/, "$1.$2");
-    value = value.replace(/(\d{3})(\d)/, "$1.$2");
-    value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-    setCpfInput(value);
+  const filteredPlayers = searchInput.trim()
+    ? players.filter((player) => {
+        const searchClean = searchInput.replace(/\D/g, "");
+        const playerCpfClean = player.cpf ? player.cpf.replace(/\D/g, "") : "";
+
+        const matchesCpf = searchClean.length > 0 && playerCpfClean.includes(searchClean);
+        const matchesName = player.name.toLowerCase().includes(searchInput.toLowerCase());
+
+        return matchesCpf || matchesName;
+      })
+    : [];
+
+  const handleSelectPlayer = (player: Player) => {
+    setSelectedPlayer(player);
+    setSearchInput("");
+  };
+
+  const handleClearPlayer = () => {
+    setSelectedPlayer(null);
+    setDepositInput("");
   };
 
   const handleDepositChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,16 +72,16 @@ export function CashierForm({ onSubmitCash }: CashierFormProps) {
 
     const deposit = parseFloat(depositInput);
 
-    if (!cpfInput.trim() || isNaN(deposit) || deposit <= 0) return;
+    if (!selectedPlayer || isNaN(deposit) || deposit <= 0) return;
 
-    onSubmitCash(deposit);
-    
-    setCpfInput("");
+    onSubmitCash(selectedPlayer.id, deposit);
+
+    setSelectedPlayer(null);
     setDepositInput("");
   };
 
   return (
-    <Box sx={{ maxWidth: 500, margin: "auto", mt: 15 }}>
+    <Box sx={{ maxWidth: 500, width: "100%" }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
         <Stack spacing={2} sx={{ mb: 3, alignItems: "center" }}>
           <PaymentsIcon color="primary" sx={{ fontSize: 40 }} />
@@ -110,16 +92,48 @@ export function CashierForm({ onSubmitCash }: CashierFormProps) {
 
         <Box component="form" onSubmit={handleDepositSubmit} noValidate>
           <Stack spacing={3}>
-            <TextField
-              label="Search Player's CPF"
-              name="PlayerCpf"
-              variant="outlined"
-              fullWidth
-              required
-              placeholder="000.000.000-00"
-              value={cpfInput}
-              onChange={handleCpfChange}
-            />
+            {selectedPlayer ? (
+              <Chip
+                icon={<PersonIcon />}
+                label={`${selectedPlayer.name} — CPF: ${selectedPlayer.cpf}`}
+                onDelete={handleClearPlayer}
+                deleteIcon={<CloseIcon />}
+                color="primary"
+                variant="outlined"
+                sx={{ py: 2.5, fontSize: 14, alignSelf: "flex-start" }}
+              />
+            ) : (
+              <Box>
+                <TextField
+                  label="Search Player by name or CPF"
+                  variant="outlined"
+                  fullWidth
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Name or CPF"
+                />
+
+                {searchInput.trim() && (
+                  <Paper variant="outlined" sx={{ mt: 1, maxHeight: 220, overflowY: "auto" }}>
+                    {filteredPlayers.length > 0 ? (
+                      <List disablePadding>
+                        {filteredPlayers.map((player) => (
+                          <ListItem key={player.id} disablePadding>
+                            <ListItemButton onClick={() => handleSelectPlayer(player)}>
+                              <ListItemText primary={player.name} secondary={`CPF: ${player.cpf}`} />
+                            </ListItemButton>
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography sx={{ p: 2, color: "text.secondary" }} variant="body2">
+                        No player found.
+                      </Typography>
+                    )}
+                  </Paper>
+                )}
+              </Box>
+            )}
 
             <TextField
               label="Deposit Amount"
@@ -130,6 +144,7 @@ export function CashierForm({ onSubmitCash }: CashierFormProps) {
               placeholder="00.00"
               value={depositInput}
               onChange={handleDepositChange}
+              disabled={!selectedPlayer}
             />
 
             <Button
@@ -137,13 +152,15 @@ export function CashierForm({ onSubmitCash }: CashierFormProps) {
               variant="contained"
               size="large"
               fullWidth
+              disabled={!selectedPlayer}
               sx={{
                 mt: 2,
                 py: 1.5,
-                fontWeight: 'bold',
-                backgroundColor: '#2e7d32',
-                '&:hover': { backgroundColor: '#1b5e20' }
-              }}>
+                fontWeight: "bold",
+                backgroundColor: "#2e7d32",
+                "&:hover": { backgroundColor: "#1b5e20" },
+              }}
+            >
               Deposit
             </Button>
           </Stack>
